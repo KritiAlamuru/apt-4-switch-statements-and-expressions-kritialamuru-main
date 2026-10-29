@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<ruleset name="Custom PMD Rules" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Custom ruleset for code metrics and Javadoc checks
+    </description>
+
+    <!-- Thresholds are raised above PMD defaults so only clearly problematic code is flagged. -->
+    <!-- PMD default: 200 -->
+    <rule ref="category/java/design.xml/NPathComplexity">
+        <properties>
+            <property name="reportLevel" value="300"/>
+        </properties>
+    </rule>
+    <!-- PMD defaults: method 10, class 80 -->
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="methodReportLevel" value="15"/>
+            <property name="classReportLevel" value="100"/>
+        </properties>
+    </rule>
+    <!-- PMD default: 15 -->
+    <rule ref="category/java/design.xml/TooManyFields">
+        <properties>
+            <property name="maxfields" value="20"/>
+        </properties>
+    </rule>
+    <!-- PMD default: 10 (getters/setters are already ignored) -->
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods" value="25"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/GodClass"/>
+    <!-- DataClass intentionally omitted: simple data-holder classes are normal in student projects. -->
+
+    <!-- Flags non-private methods that return a private mutable-looking field directly (privacy leak). -->
+    <rule name="ReturnsPrivateMutableField"
+          language="java"
+          message="Representation exposure; Method returns a private field directly; return a copy or a read-only view instead."
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            A non-private method returns a private field of a non-primitive, non-immutable type.
+            Callers can mutate the object and bypass the owning class's rules.
+            Enums are immutable and are skipped when PMD can resolve the type (run-pmd.ps1 passes
+            compiled classes via aux-classpath for this).
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+//MethodDeclaration[@Visibility != 'private']
+    [ArrayType or ClassType[not(@SimpleName = (
+        'String', 'Integer', 'Long', 'Short', 'Byte', 'Double', 'Float',
+        'Boolean', 'Character', 'BigInteger', 'BigDecimal', 'LocalDate',
+        'LocalTime', 'LocalDateTime', 'Instant', 'Duration', 'UUID', 'Optional'))]
+        [not(pmd-java:typeIs('java.lang.Enum'))]]
+    [Block/ReturnStatement/(VariableAccess | FieldAccess)[
+        @Name = ancestor::ClassBody[1]/FieldDeclaration[@Visibility = 'private']/VariableDeclarator/VariableId/@Name
+    ]]
+                ]]></value>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Documentation rules for Javadoc comments -->
+    <rule ref="category/java/documentation.xml/CommentRequired">
+        <properties>
+            <property name="classCommentRequirement" value="required"/>
+            <property name="fieldCommentRequirement" value="ignored"/>
+            <property name="protectedMethodCommentRequirement" value="ignored"/>
+            <!-- This is set required in grading - for teacher info only -->
+            <property name="publicMethodCommentRequirement" value="required"/>
+        </properties>
+    </rule>
+</ruleset>
