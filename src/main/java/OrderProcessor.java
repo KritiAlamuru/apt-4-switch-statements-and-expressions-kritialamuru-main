@@ -88,6 +88,9 @@ public class OrderProcessor {
      */
     public static int calculateDeliveryDays(String tier, boolean remoteAddress) {
         // TODO: replace this placeholder
+        if (tier == null) {
+            return -1;
+        }
         int days = switch (tier.toUpperCase()) {
             case "SAME_DAY" -> { 
                 if (remoteAddress) { 
@@ -100,13 +103,15 @@ public class OrderProcessor {
             case "OVERNIGHT" ->  1; 
             case "EXPRESS" -> 2;
             case "STANDARD", "SAVER" -> 5;
-            case "CUSTOM" -> 
+            case "CUSTOM" -> {
+                System.out.println("Calculating custom courier rates...");
+                yield 10;
+            }
             
-
             default -> INVALID;
         
         };
-        if 
+
         if (remoteAddress && days != INVALID) {
             days += 3;
         }
@@ -123,8 +128,18 @@ public class OrderProcessor {
      */
     public static double calculateShippingFeeModern(String tier, double weightLbs) {
         // TODO: replace this placeholder
-        return switch (tier.toUpperCase()) {
+        if (tier == null) {
+            return -1;
+        }
+        double fee = switch (tier.toUpperCase()) {
+            case "STANDARD", "SAVER" -> 5.00;
+            case "EXPRESS" -> 15.00;
+
             default -> -1.0;
         };
+        if (weightLbs > 20) {
+            fee += 8;
+        }
+        return fee;
     }
 }
