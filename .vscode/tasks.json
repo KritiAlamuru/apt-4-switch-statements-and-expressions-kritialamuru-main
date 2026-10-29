@@ -1,0 +1,73 @@
+// Save to .vscode/tasks.json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Export Javadoc",
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "command": "javadoc -public -Xdoclint:all,-missing -tag \"doc.implNote:a:Implementation-Notes:\" -tag \"doc.collaborators:a:Collaborators:\" -tag \"doc.testing:a:Testing:\" -d javadoc src/main/java/*.java",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run JUnit Tests",
+      "type": "shell",
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "command": "javac -d bin/classes -cp \"lib/*\" (Get-ChildItem -Recurse -Filter *.java src).FullName; if ($?) { java -jar lib/junit-platform-console-standalone-6.1.3.jar execute --class-path bin/classes --scan-class-path }",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run PMD",
+      "type": "shell",
+      "command": "pmd check -d src/main -R ./pmd/ruleset.xml -f text -r pmd-report.txt --no-cache",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install and Setup PMD (Latest)",
+      "type": "process",
+      "command": "",
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "$rel = Invoke-RestMethod 'https://api.github.com/repos/pmd/pmd/releases/latest'; $asset = $rel.assets | Where-Object name -like 'pmd-dist-*-bin.zip' | Select-Object -First 1; $zip = Join-Path $env:USERPROFILE 'Downloads\\pmd.zip'; Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip; Expand-Archive -Path $zip -DestinationPath (Join-Path $env:USERPROFILE 'Desktop') -Force; $pFolder = (Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop') -Directory -Filter 'pmd-bin-*' | Sort-Object LastWriteTime -Descending | Select-Object -First 1).FullName; $binDir = Join-Path $pFolder 'bin'; $userPath = [Environment]::GetEnvironmentVariable('Path', 'User'); if (($userPath -split ';') -notcontains $binDir) { [Environment]::SetEnvironmentVariable('Path', ($userPath + ';' + $binDir), 'User') }"
+        ],
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+name: Submission PMD Analysis
+
+on:
+  push:
+    tags:
+      - '*'
+
+# Required to grant GitHub Actions permission to push files back to the student repo
+permissions:
+  contents: write
+
+jobs:
+  pmd-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Student Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Downloads full history so git push works cleanly
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install PMD
+        run: |
+          wget https://github.com/pmd/pmd/releases/download/pmd-bin-7.0.0/pmd-dist-7.0.0-bin.zip
+          unzip -q pmd-dist-7.0.0-bin.zip
+
+      - name: Run PMD Analysis
+        # continue-on-error ensures the workflow reaches the commit step 
+        # even when PMD detects code violations
+        continue-on-error: true 
+        run: |
+          mkdir -p reports
+          ./pmd-bin-7.0.0/bin/pmd check \
+            --dir ./src \
+            --ruleset .pmd/ruleset.xml \
+            --format html \
+            --report-file reports/pmd-report.html
+
+      - name: Commit and Push PMD Report
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated PMD Report [skip ci]"
+          file_pattern: 'reports/pmd-report.html'
