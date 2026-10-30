@@ -100,7 +100,7 @@ public class OrderProcessor {
                     yield 0;
                 }
             }
-            case "OVERNIGHT" ->  1; 
+            case "OVERNIGHT" -> 1; 
             case "EXPRESS" -> 2;
             case "STANDARD", "SAVER" -> 5;
             case "CUSTOM" -> {
@@ -109,7 +109,6 @@ public class OrderProcessor {
             }
             
             default -> INVALID;
-        
         };
 
         if (remoteAddress && days != INVALID) {
@@ -128,16 +127,22 @@ public class OrderProcessor {
      */
     public static double calculateShippingFeeModern(String tier, double weightLbs) {
         // TODO: replace this placeholder
-        if (tier == null) {
+        if (tier == null || weightLbs < 0) {
             return -1;
         }
         double fee = switch (tier.toUpperCase()) {
             case "STANDARD", "SAVER" -> 5.00;
             case "EXPRESS" -> 15.00;
+            case "OVERNIGHT" -> 25.00;
+            case "SAME_DAY" -> 35.00;
 
             default -> -1.0;
         };
-        if (weightLbs > 20) {
+        if (fee == -1) {
+            return fee;
+        }
+        if (weightLbs > 20 && !tier.toUpperCase().equals("SAME_DAY") &&
+            !tier.toUpperCase().equals("OVERNIGHT")) {
             fee += 8;
         }
         return fee;
