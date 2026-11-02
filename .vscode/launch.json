@@ -6,16 +6,9 @@
     "configurations": [
         {
             "type": "java",
-            "name": "OrderProcessor",
-            "request": "launch",
-            "mainClass": "OrderProcessor",
-            "projectName": "apt-4-switch-statements-and-expressions-kritialamuru-main_4f3e487c"
-        },
-        {
-            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
-        }
+        },
     ]
 }

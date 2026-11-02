@@ -53,6 +53,7 @@ public class OrderProcessor {
                     fee += HEAVY_SURCHARGE;
                 }
                 break;
+
             case "EXPRESS":
                 fee = 15.00;
                 if (weightLbs > HEAVY_THRESHOLD_LBS) {
@@ -71,7 +72,6 @@ public class OrderProcessor {
             case "OVERNIGHT":
                 fee += 25.00;
                 break;
-
         }
 
         return fee;
